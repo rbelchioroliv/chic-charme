@@ -10,6 +10,7 @@ import Dashboard from './pages/admin/Dashboard';
 import AdminLayout from './components/layout/AdminLayout';
 import { useAuthStore } from './store/useAuthStore';
 import Products from './components/admin/Products';
+import Settings from './pages/admin/Settings';
 
 // Componente Wrapper para layout público (com Navbar/Footer)
 const PublicLayout = ({ children }) => (
@@ -57,6 +58,12 @@ function App() {
         <Route path="/admin/products" element={
           <ProtectedAdminRoute>
             <Products />
+          </ProtectedAdminRoute>
+        } />
+
+        <Route path="/admin/settings" element={
+          <ProtectedAdminRoute>
+            <Settings />
           </ProtectedAdminRoute>
         } />
 
