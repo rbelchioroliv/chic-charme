@@ -13,6 +13,8 @@ import Products from './components/admin/Products';
 import Settings from './pages/admin/Settings';
 import Checkout from './pages/shop/Checkout';
 
+import About from './pages/shop/About';
+
 // Componente Wrapper para layout público (com Navbar/Footer)
 const PublicLayout = ({ children }) => (
   <div className="flex flex-col min-h-screen relative">
@@ -44,6 +46,7 @@ function App() {
         <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
         <Route path="/shop" element={<PublicLayout><div className="pt-32 text-center">Loja</div></PublicLayout>} />
         <Route path="/product/:id" element={<PublicLayout><ProductDetails /></PublicLayout>} />
+        <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
 
         <Route path="/checkout" element={<Checkout />} />
 
