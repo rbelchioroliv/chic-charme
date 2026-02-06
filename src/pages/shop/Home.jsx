@@ -2,7 +2,7 @@ import React from 'react';
 import Hero from '../../components/home/Hero';
 import ProductCard from '../../components/ui/ProductCard';
 
-// Dados simulados (depois virão do banco de dados)
+// Dados simulados
 const FEATURED_PRODUCTS = [
   { id: 1, name: "Colar Ponto de Luz", price: "R$ 129,90", image: "https://images.unsplash.com/photo-1599643478518-17488fbbcd75?q=80&w=1887&auto=format&fit=crop", isNew: true },
   { id: 2, name: "Brincos Dourados Elegance", price: "R$ 89,90", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1887&auto=format&fit=crop", isNew: false },

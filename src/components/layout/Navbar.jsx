@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Menu, X, Search, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useCartStore } from '../../store/useCartStore'; // ADICIONE ISSO
+import { useCartStore } from '../../store/useCartStore';
+import { useAuthStore } from '../../store/useAuthStore';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
-    const items = useCartStore((state) => state.items); // ADICIONE ISSO
-    const toggleCart = useCartStore((state) => state.toggleCart); // Para abrir o carrinho depois
+    const items = useCartStore((state) => state.items);
+    const toggleCart = useCartStore((state) => state.toggleCart);
 
-    // Efeito para mudar o fundo da navbar ao rolar
+    const { user, isAuthenticated, logout } = useAuthStore();
+
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 50);
@@ -41,7 +43,26 @@ const Navbar = () => {
                     {/* Icons */}
                     <div className="hidden md:flex items-center space-x-6">
                         <button className="text-dark-800 hover:text-brand transition-colors"><Search size={20} /></button>
-                        <Link to="/login" className="text-dark-800 hover:text-brand transition-colors"><User size={20} /></Link>
+
+                        {isAuthenticated ? (
+                            <div className="relative group">
+                                <button className="flex items-center gap-2 text-dark-800 hover:text-brand">
+                                    <User size={20} />
+                                    <span className="text-sm font-medium hidden md:block">Olá, {user.name.split(' ')[0]}</span>
+                                </button>
+                                {/* Menu Dropdown Simples */}
+                                <div className="absolute right-0 mt-2 w-48 bg-white shadow-xl rounded-md py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-100">
+                                    {user.role === 'admin' && (
+                                        <Link to="/admin" className="block px-4 py-2 text-sm text-dark-800 hover:bg-gray-50 hover:text-brand">Painel Admin</Link>
+                                    )}
+                                    <Link to="/orders" className="block px-4 py-2 text-sm text-dark-800 hover:bg-gray-50 hover:text-brand">Meus Pedidos</Link>
+                                    <button onClick={logout} className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50">Sair</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <Link to="/login" className="text-dark-800 hover:text-brand transition-colors"><User size={20} /></Link>
+                        )}
+
                         <div className="relative cursor-pointer group" onClick={toggleCart}>
                             <ShoppingBag size={20} className="text-dark-800 group-hover:text-brand transition-colors" />
                             {items.length > 0 && (

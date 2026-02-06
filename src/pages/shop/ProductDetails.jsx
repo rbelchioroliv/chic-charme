@@ -32,14 +32,14 @@ const ProductDetails = () => {
   const { id } = useParams();
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState('details'); // 'details' ou 'reviews'
+  const [activeTab, setActiveTab] = useState('details'); 
   
   const addItem = useCartStore((state) => state.addItem);
   const toggleCart = useCartStore((state) => state.toggleCart);
 
   const handleAddToCart = () => {
     addItem({ ...PRODUCT_MOCK, quantity });
-    toggleCart(); // Abre o carrinho para mostrar que adicionou
+    toggleCart(); 
   };
 
   return (

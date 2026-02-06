@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 const Hero = () => {
   return (
     <section className="relative h-screen flex items-center overflow-hidden">
-      {/* Background com efeito Parallax (Simulado via CSS fixo) */}
+      {/* Background com efeito Parallax*/}
       <div 
         className="absolute inset-0 z-0"
         style={{
