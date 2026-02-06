@@ -9,6 +9,7 @@ import Login from './pages/auth/Login';
 import Dashboard from './pages/admin/Dashboard';
 import AdminLayout from './components/layout/AdminLayout';
 import { useAuthStore } from './store/useAuthStore';
+import Products from './components/admin/Products';
 
 // Componente Wrapper para layout público (com Navbar/Footer)
 const PublicLayout = ({ children }) => (
@@ -25,7 +26,7 @@ const PublicLayout = ({ children }) => (
 // Componente de Rota Protegida (Só admin entra)
 const ProtectedAdminRoute = ({ children }) => {
   const { user, isAuthenticated } = useAuthStore();
-  
+
   if (!isAuthenticated || user?.role !== 'admin') {
     return <Navigate to="/login" replace />;
   }
@@ -41,7 +42,7 @@ function App() {
         <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
         <Route path="/shop" element={<PublicLayout><div className="pt-32 text-center">Loja</div></PublicLayout>} />
         <Route path="/product/:id" element={<PublicLayout><ProductDetails /></PublicLayout>} />
-        
+
         {/* ROTA LOGIN (Sem layout padrão) */}
         <Route path="/login" element={<Login />} />
 
@@ -51,11 +52,11 @@ function App() {
             <Dashboard />
           </ProtectedAdminRoute>
         } />
-        
+
         {/* Placeholder para as próximas rotas admin */}
         <Route path="/admin/products" element={
           <ProtectedAdminRoute>
-            <div className="text-3xl font-bold text-gray-300">Gestão de Produtos (Próximo Passo)</div>
+            <Products />
           </ProtectedAdminRoute>
         } />
 
