@@ -1,54 +1,72 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Star, Minus, Plus, ShoppingBag, Truck, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Star, Minus, Plus, ShoppingBag, Truck, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCartStore } from '../../store/useCartStore';
+import { useProductStore } from '../../store/useProductStore'; // <--- Importamos o Store de Produtos
 import ProductCard from '../../components/ui/ProductCard';
 
-
-// Mock de dados (Simulando o banco de dados)
-const PRODUCT_MOCK = {
-  id: 1,
-  name: "Colar Ponto de Luz",
-  price: 129.90,
-  description: "Um clássico atemporal. Este colar ponto de luz traz delicadeza e sofisticação para qualquer look. Banhado a ouro 18k com zircônia de alto brilho.",
-  images: [
-    "https://images.unsplash.com/photo-1599643478518-17488fbbcd75?q=80&w=1887&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=2070&auto=format&fit=crop", // Imagem extra simulada
-    "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1887&auto=format&fit=crop"  // Imagem extra simulada
-  ],
-  reviews: [
-    { id: 1, user: "Ana Silva", rating: 5, text: "Simplesmente perfeito! O brilho é incrível." },
-    { id: 2, user: "Carla Dias", rating: 4, text: "Lindo, mas a corrente poderia ser um pouco maior." }
-  ]
-};
-
-const RELATED_PRODUCTS = [
-  { id: 2, name: "Brincos Dourados Elegance", price: "R$ 89,90", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1887&auto=format&fit=crop", isNew: false },
-  { id: 3, name: "Anel Solitário Classic", price: "R$ 159,90", image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=1770&auto=format&fit=crop", isNew: false },
-];
-
 const ProductDetails = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Pega o ID da URL (ex: 2)
+  const navigate = useNavigate();
+  
+  // Busca os produtos do nosso "banco de dados"
+  const { products } = useProductStore();
+  
+  // Encontra o produto específico (convertendo id da URL para número)
+  const product = products.find(p => p.id === Number(id));
+
+  // Estados locais
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState('details'); 
-  
+  const [activeTab, setActiveTab] = useState('details');
+
   const addItem = useCartStore((state) => state.addItem);
   const toggleCart = useCartStore((state) => state.toggleCart);
 
+  // Se o produto não for encontrado (ex: ID inválido), mostra erro ou volta
+  if (!product) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <h2 className="text-2xl font-bold text-gray-800">Produto não encontrado</h2>
+        <button onClick={() => navigate('/')} className="text-brand mt-4 hover:underline">Voltar para a loja</button>
+      </div>
+    );
+  }
+
+  // Define imagens (usa a imagem do produto + algumas placeholders se não tiver array de imagens)
+  const productImages = product.images || [
+    product.image,
+    "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=2070&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1887&auto=format&fit=crop"
+  ];
+
+  // Filtra produtos relacionados (todos menos o atual)
+  const relatedProducts = products.filter(p => p.id !== product.id).slice(0, 4);
+
   const handleAddToCart = () => {
-    addItem({ ...PRODUCT_MOCK, quantity });
-    toggleCart(); 
+    // Adiciona o produto REAL ao carrinho
+    addItem({ 
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      quantity: quantity 
+    });
+    toggleCart();
   };
 
   return (
     <div className="pt-32 pb-20 bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Breadcrumb simples */}
-        <div className="text-sm text-gray-400 mb-8">
-          <Link to="/" className="hover:text-brand">Início</Link> / <Link to="/shop" className="hover:text-brand">Colares</Link> / <span className="text-dark-900">{PRODUCT_MOCK.name}</span>
+        {/* Breadcrumb e Voltar */}
+        <div className="flex items-center gap-2 text-sm text-gray-400 mb-8">
+          <button onClick={() => navigate(-1)} className="hover:text-brand flex items-center gap-1">
+             <ArrowLeft size={14}/> Voltar
+          </button> 
+          <span>/</span>
+          <span className="text-dark-900 font-medium">{product.name}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
@@ -61,10 +79,10 @@ const ProductDetails = () => {
               transition={{ duration: 0.5 }}
               className="aspect-square overflow-hidden rounded-lg bg-gray-100"
             >
-              <img src={PRODUCT_MOCK.images[activeImage]} alt={PRODUCT_MOCK.name} className="w-full h-full object-cover" />
+              <img src={productImages[activeImage]} alt={product.name} className="w-full h-full object-cover" />
             </motion.div>
             <div className="grid grid-cols-4 gap-4">
-              {PRODUCT_MOCK.images.map((img, idx) => (
+              {productImages.map((img, idx) => (
                 <button 
                   key={idx} 
                   onClick={() => setActiveImage(idx)}
@@ -78,19 +96,25 @@ const ProductDetails = () => {
 
           {/* Coluna da Direita: Informações */}
           <div>
-            <h1 className="text-4xl font-serif text-dark-900 mb-2">{PRODUCT_MOCK.name}</h1>
+            <span className="text-brand text-sm font-bold tracking-widest uppercase mb-2 block">{product.category}</span>
+            <h1 className="text-4xl font-serif text-dark-900 mb-2">{product.name}</h1>
+            
             <div className="flex items-center gap-2 mb-6">
               <div className="flex text-yellow-400">
                 {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" />)}
               </div>
-              <span className="text-sm text-gray-500">(12 avaliações)</span>
+              <span className="text-sm text-gray-500">(Avaliações simuladas)</span>
             </div>
 
-            <p className="text-3xl text-brand font-medium mb-8">R$ {PRODUCT_MOCK.price.toFixed(2).replace('.', ',')}</p>
+            <p className="text-3xl text-brand font-medium mb-8">
+                R$ {Number(product.price).toFixed(2).replace('.', ',')}
+            </p>
             
-            <p className="text-gray-600 leading-relaxed mb-8">{PRODUCT_MOCK.description}</p>
+            <p className="text-gray-600 leading-relaxed mb-8">
+              {product.description || "Uma peça exclusiva da coleção Chic & Charm, desenhada para realçar sua elegância natural com materiais de alta qualidade."}
+            </p>
 
-            {/* Controles */}
+            {/* Controles de Quantidade e Botão */}
             <div className="flex items-center gap-6 mb-8">
               <div className="flex items-center border border-gray-300 rounded-full px-4 py-2 gap-4">
                 <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="text-gray-500 hover:text-brand"><Minus size={16}/></button>
@@ -119,63 +143,26 @@ const ProductDetails = () => {
           </div>
         </div>
 
-        {/* Abas: Detalhes e Comentários */}
+        {/* Abas */}
         <div className="mb-20">
           <div className="flex justify-center border-b border-gray-200 mb-8">
-            <button 
-              onClick={() => setActiveTab('details')}
-              className={`pb-4 px-8 text-sm font-bold uppercase tracking-widest transition-all ${activeTab === 'details' ? 'border-b-2 border-brand text-brand' : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              Detalhes
-            </button>
-            <button 
-              onClick={() => setActiveTab('reviews')}
-              className={`pb-4 px-8 text-sm font-bold uppercase tracking-widest transition-all ${activeTab === 'reviews' ? 'border-b-2 border-brand text-brand' : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              Avaliações
-            </button>
+            <button onClick={() => setActiveTab('details')} className={`pb-4 px-8 text-sm font-bold uppercase tracking-widest transition-all ${activeTab === 'details' ? 'border-b-2 border-brand text-brand' : 'text-gray-400'}`}>Detalhes</button>
+            <button onClick={() => setActiveTab('reviews')} className={`pb-4 px-8 text-sm font-bold uppercase tracking-widest transition-all ${activeTab === 'reviews' ? 'border-b-2 border-brand text-brand' : 'text-gray-400'}`}>Avaliações</button>
           </div>
-
-          <div className="max-w-3xl mx-auto">
-            {activeTab === 'details' ? (
-              <div className="text-gray-600 space-y-4 leading-relaxed animate-in fade-in duration-500">
-                <p>Nossas peças são desenvolvidas com tecnologia antialérgica e possuem acabamento impecável.</p>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li>Banho de Ouro 18k (10 milésimos)</li>
-                  <li>Verniz Diamond para maior durabilidade</li>
-                  <li>Livre de Níquel (Hipoalergênico)</li>
-                </ul>
-              </div>
-            ) : (
-              <div className="space-y-8 animate-in fade-in duration-500">
-                {PRODUCT_MOCK.reviews.map((review) => (
-                  <div key={review.id} className="border-b border-gray-100 pb-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-serif font-bold text-dark-900">{review.user}</span>
-                      <div className="flex text-yellow-400">
-                        {[...Array(5)].map((_, i) => <Star key={i} size={14} fill={i < review.rating ? "currentColor" : "none"} className={i >= review.rating ? "text-gray-300" : ""} />)}
-                      </div>
-                    </div>
-                    <p className="text-gray-600 text-sm">{review.text}</p>
-                  </div>
-                ))}
-                
-                {/* Pequeno Form de Comentário */}
-                <div className="bg-gray-50 p-6 rounded-lg mt-8">
-                  <h4 className="font-serif font-bold mb-4">Deixe sua avaliação</h4>
-                  <textarea className="w-full p-3 border border-gray-200 rounded-md focus:outline-none focus:border-brand mb-4 text-sm" rows="3" placeholder="O que achou do produto?"></textarea>
-                  <button className="bg-dark-900 text-white px-6 py-2 rounded-full text-sm hover:bg-brand transition-colors">Enviar Comentário</button>
-                </div>
-              </div>
-            )}
+          <div className="max-w-3xl mx-auto text-gray-600 leading-relaxed text-center">
+             {activeTab === 'details' ? (
+                 <p>Peça desenvolvida com tecnologia hipoalergênica. Acabamento premium em ouro 18k ou Ródio Branco.</p>
+             ) : (
+                 <p>Ainda não há avaliações para este produto.</p>
+             )}
           </div>
         </div>
 
-        {/* Produtos Relacionados */}
+        {/* Produtos Relacionados Reais */}
         <div>
            <h3 className="text-2xl font-serif text-center mb-10">Você também pode gostar</h3>
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {RELATED_PRODUCTS.map(prod => (
+              {relatedProducts.map(prod => (
                 <ProductCard key={prod.id} product={prod} />
               ))}
            </div>
