@@ -42,10 +42,6 @@ const Navbar = () => {
                     <div className="hidden md:flex items-center space-x-6">
                         <button className="text-dark-800 hover:text-brand transition-colors"><Search size={20} /></button>
                         <Link to="/login" className="text-dark-800 hover:text-brand transition-colors"><User size={20} /></Link>
-                        <div className="relative cursor-pointer group">
-                            <ShoppingBag size={20} className="text-dark-800 group-hover:text-brand transition-colors" />
-                            <span className="absolute -top-2 -right-2 bg-brand text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">0</span>
-                        </div>
                         <div className="relative cursor-pointer group" onClick={toggleCart}>
                             <ShoppingBag size={20} className="text-dark-800 group-hover:text-brand transition-colors" />
                             {items.length > 0 && (
